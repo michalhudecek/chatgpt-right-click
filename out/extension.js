@@ -64,6 +64,7 @@ async function callOpenAI(model, apiKey, content) {
     }
     return JSON.stringify(data);
 }
+let chatgptOutputChannel;
 function activate(context) {
     const disposable = vscode.commands.registerCommand("chatgpt-right-click.runOnSelection", async () => {
         const editor = vscode.window.activeTextEditor;
@@ -110,26 +111,34 @@ function activate(context) {
                 model = picked.model.trim();
             }
         }
-        const channel = vscode.window.createOutputChannel("ChatGPT Right Click");
-        channel.show(true);
+        if (!chatgptOutputChannel) {
+            chatgptOutputChannel = vscode.window.createOutputChannel("ChatGPT Right Click");
+        }
+        const channel = chatgptOutputChannel;
         channel.appendLine(finalPrompt);
         channel.appendLine(`> Sending to ${model}:`);
-        try {
-            const answer = await callOpenAI(model, apiKey, finalPrompt);
-            channel.appendLine("");
-            channel.appendLine(answer);
-            // Replace the selected text with the answer
-            const activeEditor = vscode.window.activeTextEditor;
-            if (activeEditor && !activeEditor.selection.isEmpty) {
-                await activeEditor.edit(editBuilder => {
-                    editBuilder.replace(activeEditor.selection, answer);
-                });
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Window,
+            title: "ChatGPT is processing...",
+            cancellable: false
+        }, async () => {
+            try {
+                const answer = await callOpenAI(model, apiKey, finalPrompt);
+                channel.appendLine("");
+                channel.appendLine(answer);
+                // Replace the selected text with the answer
+                const activeEditor = vscode.window.activeTextEditor;
+                if (activeEditor && !activeEditor.selection.isEmpty) {
+                    await activeEditor.edit(editBuilder => {
+                        editBuilder.replace(activeEditor.selection, answer);
+                    });
+                }
             }
-        }
-        catch (e) {
-            channel.appendLine("");
-            channel.appendLine(String(e?.message || e));
-        }
+            catch (e) {
+                channel.appendLine("");
+                channel.appendLine(String(e?.message || e));
+            }
+        });
     });
     context.subscriptions.push(disposable);
 }

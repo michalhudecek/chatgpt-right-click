@@ -28,6 +28,8 @@ async function callOpenAI(model: string, apiKey: string, content: string): Promi
   return JSON.stringify(data);
 }
 
+let chatgptOutputChannel: vscode.OutputChannel | undefined;
+
 export function activate(context: vscode.ExtensionContext) {
   const disposable = vscode.commands.registerCommand("chatgpt-right-click.runOnSelection", async () => {
     const editor = vscode.window.activeTextEditor;
@@ -78,26 +80,34 @@ export function activate(context: vscode.ExtensionContext) {
       }
     }
 
-    const channel = vscode.window.createOutputChannel("ChatGPT Right Click");
-    channel.show(true);
+    if (!chatgptOutputChannel) {
+      chatgptOutputChannel = vscode.window.createOutputChannel("ChatGPT Right Click");
+    }
+    const channel = chatgptOutputChannel;
   channel.appendLine(finalPrompt);
   channel.appendLine(`> Sending to ${model}:`);
 
-    try {
-      const answer = await callOpenAI(model, apiKey, finalPrompt);
-      channel.appendLine("");
-      channel.appendLine(answer);
-      // Replace the selected text with the answer
-      const activeEditor = vscode.window.activeTextEditor;
-      if (activeEditor && !activeEditor.selection.isEmpty) {
-        await activeEditor.edit(editBuilder => {
-          editBuilder.replace(activeEditor.selection, answer);
-        });
+    await vscode.window.withProgress({
+      location: vscode.ProgressLocation.Window,
+      title: "ChatGPT is processing...",
+      cancellable: false
+    }, async () => {
+      try {
+        const answer = await callOpenAI(model, apiKey, finalPrompt);
+        channel.appendLine("");
+        channel.appendLine(answer);
+        // Replace the selected text with the answer
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor && !activeEditor.selection.isEmpty) {
+          await activeEditor.edit(editBuilder => {
+            editBuilder.replace(activeEditor.selection, answer);
+          });
+        }
+      } catch (e: any) {
+        channel.appendLine("");
+        channel.appendLine(String(e?.message || e));
       }
-    } catch (e: any) {
-      channel.appendLine("");
-      channel.appendLine(String(e?.message || e));
-    }
+    });
   });
 
   context.subscriptions.push(disposable);
