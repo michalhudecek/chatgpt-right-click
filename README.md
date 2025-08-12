@@ -27,9 +27,11 @@ ChatGPT Right Click is a Visual Studio Code extension that allows you to quickly
 - Internet connection (for ChatGPT API access)
 
 ## Extension Settings
+
 This extension provides the following settings:
 - `chatgpt-right-click.openaiApiKey`: Set your OpenAI API key.
 - `chatgpt-right-click.model`: Default ChatGPT model to use (can be changed per prompt).
+- `chatgpt-right-click.enableWebsearch`: Enable websearch for each prompt. If true, websearch will be used for every prompt unless disabled.
 
 ## Known Issues
 - Some features may require a valid OpenAI API key.

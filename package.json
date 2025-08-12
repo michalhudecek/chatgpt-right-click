@@ -31,6 +31,11 @@
           "markdownDescription": "OpenAI API key. Stored by VS Code settings.",
           "default": ""
         },
+  "chatgpt-right-click.enableWebsearch": {
+    "type": "boolean",
+    "default": false,
+    "markdownDescription": "Enable websearch for each prompt. If true, websearch will be used for every prompt unless disabled."
+  },
   "chatgpt-right-click.model": {
           "type": "string",
           "default": "gpt-4.1-mini",
@@ -47,6 +52,10 @@
               "model": {
                 "type": "string",
                 "markdownDescription": "(Optional) Model to use for this prompt. Overrides the global model setting if specified."
+              },
+              "enableWebsearch": {
+                "type": "boolean",
+                "markdownDescription": "(Optional) Enable websearch for this prompt. If true, websearch will be used for this prompt regardless of the global setting. If false, disables websearch for this prompt. If not set, falls back to the global setting."
               }
             },
             "required": ["label", "template"],

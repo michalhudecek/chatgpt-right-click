@@ -35,21 +35,21 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
+// Placeholder websearch function. Replace with real API integration as needed.
+async function performWebsearch(query) {
+    // TODO: Integrate with a real websearch API (e.g., Bing, Google, SerpAPI, etc.)
+    // For now, return a mock result.
+    return `Websearch results for "${query}":\n- Example result 1\n- Example result 2`;
+}
 const vscode = __importStar(require("vscode"));
-async function callOpenAI(model, apiKey, content) {
+async function callOpenAI(body, apiKey) {
     const resp = await fetch("https://api.openai.com/v1/responses", {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${apiKey}`,
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-            model,
-            input: [
-                { role: "system", content: "You are a precise programming assistant." },
-                { role: "user", content }
-            ]
-        })
+        body: JSON.stringify(body)
     });
     if (!resp.ok) {
         const t = await resp.text();
@@ -79,12 +79,14 @@ function activate(context) {
         const apiKey = cfg.get("openaiApiKey") || "";
         const defaultModel = cfg.get("model") || "gpt-4.1-mini";
         const prompts = (cfg.get("prompts") || []);
+        const globalEnableWebsearch = cfg.get("enableWebsearch") || false;
+        // You can now use enableWebsearch in your prompt logic
         if (!apiKey) {
             vscode.window.showErrorMessage("Set ChatGPT Right Click: OpenAI API Key in Settings.");
             return;
         }
         const pickItems = [
-            ...prompts.map(p => ({ label: p.label, template: p.template, model: p.model })),
+            ...prompts.map(p => ({ label: p.label, template: p.template, model: p.model, enableWebsearch: p.enableWebsearch })),
             { label: "Custom…", template: "", model: undefined }
         ];
         const picked = await vscode.window.showQuickPick(pickItems, { placeHolder: "Choose a prompt" });
@@ -111,6 +113,12 @@ function activate(context) {
                 model = picked.model.trim();
             }
         }
+        // Determine enableWebsearch for this prompt: prompt property > global setting
+        let enableWebsearch = globalEnableWebsearch;
+        if (typeof picked.enableWebsearch === 'boolean') {
+            enableWebsearch = picked.enableWebsearch;
+        }
+        // No need to manually perform websearch; handled by OpenAI API if enabled
         if (!chatgptOutputChannel) {
             chatgptOutputChannel = vscode.window.createOutputChannel("ChatGPT Right Click");
         }
@@ -123,7 +131,22 @@ function activate(context) {
             cancellable: false
         }, async () => {
             try {
-                const answer = await callOpenAI(model, apiKey, finalPrompt);
+                // Construct the request body ONCE and use for both logging and API call
+                const body = {
+                    model,
+                    input: [
+                        { role: "system", content: "You are a precise programming assistant." },
+                        { role: "user", content: finalPrompt }
+                    ]
+                };
+                if (enableWebsearch) {
+                    body.tools = [{ type: "web_search" }];
+                }
+                channel.appendLine("");
+                channel.appendLine("--- ChatGPT Request Body ---");
+                channel.appendLine(JSON.stringify(body, null, 2));
+                channel.appendLine("----------------------------");
+                const answer = await callOpenAI(body, apiKey);
                 channel.appendLine("");
                 channel.appendLine(answer);
                 // Replace the selected text with the answer
