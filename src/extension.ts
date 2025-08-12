@@ -39,40 +39,49 @@ export function activate(context: vscode.ExtensionContext) {
       return;
     }
 
-  const cfg = vscode.workspace.getConfiguration("chatgpt-right-click");
+    const cfg = vscode.workspace.getConfiguration("chatgpt-right-click");
     const apiKey = cfg.get<string>("openaiApiKey") || "";
-    const model = cfg.get<string>("model") || "gpt-4o-mini";
-    const prompts = (cfg.get<any[]>("prompts") || []) as { label: string; template: string }[];
+    const defaultModel = cfg.get<string>("model") || "gpt-4.1-mini";
+  const prompts = (cfg.get<any[]>("prompts") || []) as { label: string; template: string; model?: string }[];
 
     if (!apiKey) {
-  vscode.window.showErrorMessage("Set ChatGPT Right Click: OpenAI API Key in Settings.");
+      vscode.window.showErrorMessage("Set ChatGPT Right Click: OpenAI API Key in Settings.");
       return;
     }
 
-    const pickItems = [
-      ...prompts.map(p => ({ label: p.label, template: p.template })),
-      { label: "Custom…", template: "" }
+
+    const pickItems: { label: string; template: string; model?: string }[] = [
+      ...prompts.map(p => ({ label: p.label, template: p.template, model: p.model })),
+      { label: "Custom…", template: "", model: undefined }
     ];
 
     const picked = await vscode.window.showQuickPick(pickItems, { placeHolder: "Choose a prompt" });
     if (!picked) return;
 
     let finalPrompt: string;
+    let model: string = defaultModel;
     if (picked.label === "Custom…") {
-  const tpl = await vscode.window.showInputBox({ prompt: "Enter prompt. Use {selection} or {} as placeholder for the selection." });
-  if (!tpl) return;
-  finalPrompt = tpl.replaceAll("{selection}", selection).replaceAll("{}", selection);
+      const tpl = await vscode.window.showInputBox({ prompt: "Enter prompt. Use {selection} or {} as placeholder for the selection." });
+      if (!tpl) return;
+      finalPrompt = tpl.replaceAll("{selection}", selection).replaceAll("{}", selection);
+      // Ask for model for custom prompt
+      const modelInput = await vscode.window.showInputBox({
+        prompt: "Enter model to use for this prompt (leave as default to use settings)",
+        value: defaultModel
+      });
+      model = modelInput?.trim() || defaultModel;
     } else {
-  finalPrompt = picked.template.replaceAll("{selection}", selection).replaceAll("{}", selection);
+      finalPrompt = picked.template.replaceAll("{selection}", selection).replaceAll("{}", selection);
+      // Use model from prompt if present, else default
+      if (picked.model && typeof picked.model === 'string' && picked.model.trim()) {
+        model = picked.model.trim();
+      }
     }
 
-  const channel = vscode.window.createOutputChannel("ChatGPT Right Click");
-  channel.show(true);
-  channel.appendLine(`# Prompt sent to ChatGPT:`);
-  channel.appendLine("");
+    const channel = vscode.window.createOutputChannel("ChatGPT Right Click");
+    channel.show(true);
   channel.appendLine(finalPrompt);
-  channel.appendLine("");
-  channel.appendLine("> Sending to OpenAI…");
+  channel.appendLine(`> Sending to ${model}:`);
 
     try {
       const answer = await callOpenAI(model, apiKey, finalPrompt);
@@ -93,5 +102,4 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(disposable);
 }
-
 export function deactivate() {}

@@ -9,6 +9,7 @@ ChatGPT Right Click is a Visual Studio Code extension that allows you to quickly
 - **Refactoring suggestions**: Receive AI-powered refactoring ideas.
 - **Documentation generation**: Automatically generate documentation for your code.
 - **Custom prompts**: Send your own prompts to ChatGPT for flexible assistance.
+- **Per-prompt model selection**: Choose or enter the OpenAI model for each prompt, or use your default setting.
 
 ## Getting Started
 1. **Install the extension**
@@ -18,6 +19,7 @@ ChatGPT Right Click is a Visual Studio Code extension that allows you to quickly
 3. **Usage**
    - Right-click on any code selection in the editor.
    - Choose a ChatGPT action from the context menu.
+   - After picking a prompt, you can enter or change the model for this prompt (defaults to your settings value).
    - View the AI response in the editor or a dedicated panel.
 
 ## Requirements
@@ -25,9 +27,9 @@ ChatGPT Right Click is a Visual Studio Code extension that allows you to quickly
 - Internet connection (for ChatGPT API access)
 
 ## Extension Settings
-This extension may provide the following settings:
-- `chatgptRightClick.apiKey`: Set your OpenAI API key.
-- `chatgptRightClick.model`: Choose the ChatGPT model to use.
+This extension provides the following settings:
+- `chatgpt-right-click.openaiApiKey`: Set your OpenAI API key.
+- `chatgpt-right-click.model`: Default ChatGPT model to use (can be changed per prompt).
 
 ## Known Issues
 - Some features may require a valid OpenAI API key.
@@ -45,7 +47,13 @@ Contributions are welcome! Please open issues or pull requests on the [GitHub re
 ## License
 [MIT](https://github.com/MichalHudecek/chatgpt-right-click/blob/main/LICENSE)
 
-## Rebuilding the package
+## Rebuilding the package for debugging
+`yarn run compile`
+
+Press F5 in VS Code to launch debugging.
+
+## Rebuilding the package for publishing
+
 ```
 npm ci
 npm run compile

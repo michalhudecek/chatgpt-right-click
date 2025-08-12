@@ -2,7 +2,7 @@
   "name": "chatgpt-right-click",
   "displayName": "ChatGPT Right Click",
   "publisher": "MichalHudecek",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": { "vscode": "^1.90.0" },
   "categories": ["Other"],
   "activationEvents": [
@@ -43,7 +43,11 @@
             "type": "object",
             "properties": {
               "label": { "type": "string" },
-              "template": { "type": "string" }
+              "template": { "type": "string" },
+              "model": {
+                "type": "string",
+                "markdownDescription": "(Optional) Model to use for this prompt. Overrides the global model setting if specified."
+              }
             },
             "required": ["label", "template"],
             "additionalProperties": false
