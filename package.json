@@ -5,7 +5,7 @@
   "publisher": "MichalHudecek",
   "version": "0.0.6",
   "engines": { "vscode": "^1.90.0" },
-  "categories": ["Productivity", "AI", "Utilities"],
+  "categories": ["ai", "other"],
   "activationEvents": [
 
   ],
