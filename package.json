@@ -1,10 +1,11 @@
 {
   "name": "chatgpt-right-click",
   "displayName": "ChatGPT Right Click",
+  "description": "Quickly apply ChatGPT prompts to selected text via right-click in the editor.",
   "publisher": "MichalHudecek",
   "version": "0.0.6",
   "engines": { "vscode": "^1.90.0" },
-  "categories": ["Other"],
+  "categories": ["Productivity", "AI", "Utilities"],
   "activationEvents": [
 
   ],
