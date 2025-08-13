@@ -1,0 +1,86 @@
+{
+  "name": "chatgpt-right-click",
+  "displayName": "ChatGPT Right Click",
+  "publisher": "MichalHudecek",
+  "version": "0.0.5",
+  "engines": { "vscode": "^1.90.0" },
+  "categories": ["Other"],
+  "activationEvents": [
+
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+  { "command": "chatgpt-right-click.runOnSelection", "title": "ChatGPT Right Click: Run on Selection" }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "chatgpt-right-click.runOnSelection",
+          "group": "navigation@9",
+          "when": "editorTextFocus && editorHasSelection"
+        }
+      ]
+    },
+    "configuration": {
+  "title": "ChatGPT Right Click",
+      "properties": {
+  "chatgpt-right-click.openaiApiKey": {
+      "name": "chatgpt-right-click",
+      "displayName": "ChatGPT Right Click",
+          "markdownDescription": "OpenAI API key. Stored by VS Code settings.",
+          "default": ""
+        },
+  "chatgpt-right-click.enableWebsearch": {
+    "type": "boolean",
+    "default": false,
+    "markdownDescription": "Enable websearch for each prompt. If true, websearch will be used for every prompt unless disabled."
+  },
+  "chatgpt-right-click.model": {
+          "type": "string",
+          "default": "gpt-4.1-mini",
+          "markdownDescription": "OpenAI model for the Responses API."
+        },
+  "chatgpt-right-click.prompts": {
+          "type": "array",
+          "markdownDescription": "List of prompt templates. {selection} is replaced with the current selection.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "template": { "type": "string" },
+              "model": {
+                "type": "string",
+                "markdownDescription": "(Optional) Model to use for this prompt. Overrides the global model setting if specified."
+              },
+              "enableWebsearch": {
+                "type": "boolean",
+                "markdownDescription": "(Optional) Enable websearch for this prompt. If true, websearch will be used for this prompt regardless of the global setting. If false, disables websearch for this prompt. If not set, falls back to the global setting."
+              }
+            },
+            "required": ["label", "template"],
+            "additionalProperties": false
+          },
+          "default": [
+            { "label": "Fix grammar and spelling", "template": "Fix the grammar and spelling of '{selection}'.\nPreserve all formatting, line breaks, and special characters. Do not add or remove any content. Return only the corrected text." },
+            { "label": "Smooth the language", "template": "Smooth this text: {selection} \nReturn only the edited text without any comments. Do not remove footnotes from markdown." }
+          ]
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "compile": "tsc -p ./",
+    "watch": "tsc -w -p ./"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MichalHudecek/chatgpt-right-click"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.5.4",
+    "vsce": "^2.15.0"
+  }
+}
