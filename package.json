@@ -2,13 +2,14 @@
   "name": "chatgpt-right-click",
   "displayName": "ChatGPT Right Click",
   "publisher": "MichalHudecek",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "engines": { "vscode": "^1.90.0" },
   "categories": ["Other"],
   "activationEvents": [
 
   ],
   "main": "./out/extension.js",
+    "icon": "chatgpt_right_click.png",
   "contributes": {
     "commands": [
   { "command": "chatgpt-right-click.runOnSelection", "title": "ChatGPT Right Click: Run on Selection" }
